@@ -7,7 +7,6 @@
 <img src="https://img.shields.io/badge/Claude%20Code-MCP%20Ready-8B5CF6?style=for-the-badge" />
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 
-# BetterDB × Krish Naik Academy
 
 ### *AI Infrastructure Observability — RAG Pipeline Demo*
 
