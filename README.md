@@ -13,9 +13,6 @@
 
 **"Your AI App's Redis is Broken — And You Don't Know It"**
 
-*A collaboration between [BetterDB](https://betterdb.com) and [Krish Naik](https://www.youtube.com/@krishnaik06)*
-
-[📺 Watch the Video](https://www.youtube.com/watch?v=Wh3k3CelSbQ) · [📖 Full Step-by-Step Guide](step-by-step.md) · [🌐 BetterDB](https://betterdb.com)
 
 </div>
 
