@@ -107,8 +107,9 @@ def stats():
         }
 
     result["_config"] = {
+        "provider": s.llm_provider,
         "embedding_model": s.embedding_model,
-        "llm_model": s.openai_model,
+        "llm_model": s.llm_model,
         "cache_threshold": s.cache_threshold,
         "rate_limit_minute": s.rate_limit_minute,
     }

@@ -10,7 +10,8 @@ import numpy as np
 import pypdf
 from fastapi import HTTPException
 
-from .config import get_openai, get_redis, get_settings
+from .config import get_redis, get_settings
+from .llm import embed_texts, generate_answer
 
 # ── Key pattern constants ─────────────────────────────────────────────────────
 # Students see exactly which Redis command writes which key.
@@ -81,7 +82,6 @@ async def ingest_pdf(file_bytes: bytes, filename: str) -> dict:
     """PDF → chunks → embeddings → rag:doc:* keys in Redis. NO TTL (Feature 2 bug)."""
     s = get_settings()
     r = get_redis()
-    client = get_openai()
 
     # Extract text
     reader = pypdf.PdfReader(io.BytesIO(file_bytes))
@@ -91,14 +91,7 @@ async def ingest_pdf(file_bytes: bytes, filename: str) -> dict:
 
     # Chunk
     chunks = _chunk_text(full_text, s.chunk_size, s.chunk_overlap)
-
-    # Batch embed (OpenAI allows up to 2048 inputs per call)
-    batch_size = 100
-    all_embeddings: list[list[float]] = []
-    for i in range(0, len(chunks), batch_size):
-        batch = chunks[i : i + batch_size]
-        resp = await client.embeddings.create(model=s.embedding_model, input=batch)
-        all_embeddings.extend([item.embedding for item in resp.data])
+    all_embeddings = await embed_texts(chunks)
 
     # Store each chunk as rag:doc:{sha256} HSET — NO expire (TTL=-1, the bug)
     pipe = r.pipeline(transaction=False)
@@ -203,15 +196,13 @@ def store_session_message(session_id: str, role: str, content: str) -> None:
 async def query_rag(query: str, user_id: str, session_id: str) -> dict:
     """Full pipeline: rate limit → embed → cache check → retrieve → LLM → cache store → session."""
     s = get_settings()
-    client = get_openai()
     t0 = time.perf_counter()
 
     # 1. Rate limit (Feature 4)
     check_rate_limit(user_id)
 
     # 2. Embed query
-    embed_resp = await client.embeddings.create(model=s.embedding_model, input=[query])
-    query_embedding = embed_resp.data[0].embedding
+    query_embedding = (await embed_texts([query], task_type="RETRIEVAL_QUERY"))[0]
 
     # 3. Semantic cache lookup (Feature 2)
     cached = await semantic_cache_lookup(query_embedding)
@@ -233,15 +224,10 @@ async def query_rag(query: str, user_id: str, session_id: str) -> dict:
 
     # 5. LLM generation
     context = "\n\n---\n\n".join(docs)
-    messages = [
-        {"role": "system", "content": "Answer the question using only the context provided. Be concise."},
-        {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {query}"},
-    ]
-    completion = await client.chat.completions.create(model=s.openai_model, messages=messages, max_tokens=512)
-    response = completion.choices[0].message.content or ""
+    response = await generate_answer(query, context)
 
     # 6. Store in semantic cache — NO expire (Feature 2 TTL bug)
-    store_cache_entry(query, query_embedding, response, s.openai_model)
+    store_cache_entry(query, query_embedding, response, s.llm_model)
 
     # 7. Store session messages — NO expire (Feature 3 runaway)
     store_session_message(session_id, "user", query)
