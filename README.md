@@ -233,8 +233,4 @@ MIT — free to use, modify, distribute.
 
 <div align="center">
 
-**Built by [Krish Naik](https://github.com/krishnaik06) in collaboration with [BetterDB](https://betterdb.com)**
-
-[🌐 betterdb.com](https://betterdb.com) · [📺 Krish Naik Academy](https://www.youtube.com/@krishnaik06)
-
 </div>
