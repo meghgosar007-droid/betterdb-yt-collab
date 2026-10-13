@@ -7,15 +7,11 @@
 <img src="https://img.shields.io/badge/Claude%20Code-MCP%20Ready-8B5CF6?style=for-the-badge" />
 <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
 
-# BetterDB × Krish Naik Academy
 
 ### *AI Infrastructure Observability — RAG Pipeline Demo*
 
 **"Your AI App's Redis is Broken — And You Don't Know It"**
 
-*A collaboration between [BetterDB](https://betterdb.com) and [Krish Naik](https://www.youtube.com/@krishnaik06)*
-
-[📺 Watch the Video](https://www.youtube.com/watch?v=Wh3k3CelSbQ) · [📖 Full Step-by-Step Guide](step-by-step.md) · [🌐 BetterDB](https://betterdb.com)
 
 </div>
 
